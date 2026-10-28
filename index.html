@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppointEase – Bank Appointment & Queue Management System</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <h1>AppointEase</h1>
+        <p class="tagline">Book your bank visit. Get your queue number. Skip the line.</p>
+      </div>
+      <p class="staff-badge">On duty: <strong id="staff-name">–</strong></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Public queue board (R7) -->
+    <section class="board" aria-labelledby="board-title">
+      <div class="board-serving">
+        <h2 id="board-title">Now serving</h2>
+        <div id="now-serving-number" class="board-number">–</div>
+        <p id="now-serving-detail" class="board-detail">Nobody is being served yet.</p>
+      </div>
+      <dl class="board-stats">
+        <div><dt>Waiting</dt><dd id="waiting-count">0</dd></div>
+        <div><dt>Completed</dt><dd id="completed-count">0</dd></div>
+        <div><dt>Last number issued</dt><dd id="last-number">0</dd></div>
+      </dl>
+    </section>
+
+    <section class="card services-card" aria-labelledby="services-title">
+      <h2 id="services-title">Banking services</h2>
+      <div id="service-list" class="service-menu"></div>
+    </section>
+
+    <div class="layout services-gap">
+      <!-- ============ CUSTOMER SIDE ============ -->
+      <div class="column">
+        <section class="card" aria-labelledby="register-title">
+          <h2 id="register-title">Create an account</h2>
+          <form id="register-form" novalidate>
+            <div class="field">
+              <label for="reg-name">Full name</label>
+              <input type="text" id="reg-name" required maxlength="50" autocomplete="name" placeholder="Jane Doe"
+                     data-validate="name" aria-describedby="err-reg-name" />
+              <small class="field-error" id="err-reg-name" role="alert"></small>
+            </div>
+            <div class="field">
+              <label for="reg-email">Email</label>
+              <input type="email" id="reg-email" required maxlength="254" autocomplete="email" placeholder="jane@example.com"
+                     data-validate="email" aria-describedby="err-reg-email" />
+              <small class="field-error" id="err-reg-email" role="alert"></small>
+            </div>
+            <div class="field">
+              <label for="reg-phone">Phone</label>
+              <input type="tel" id="reg-phone" required maxlength="16" autocomplete="tel" placeholder="555 1234"
+                     data-validate="phone" aria-describedby="hint-reg-phone err-reg-phone" />
+              <small class="hint" id="hint-reg-phone">7 digits. Spaces, hyphens or +678 are fine.</small>
+              <small class="field-error" id="err-reg-phone" role="alert"></small>
+            </div>
+            <button type="submit" class="btn primary">Create account</button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="book-title">
+          <h2 id="book-title">Book an appointment</h2>
+          <form id="book-form" novalidate>
+            <div class="field">
+              <label for="book-email">Your registered email</label>
+              <input type="email" id="book-email" required maxlength="254" placeholder="jane@example.com"
+                     data-validate="email" aria-describedby="err-book-email" />
+              <small class="field-error" id="err-book-email" role="alert"></small>
+            </div>
+            <div class="field">
+              <label for="book-service">Banking service</label>
+              <select id="book-service" required aria-describedby="err-book-service"></select>
+              <small class="field-error" id="err-book-service" role="alert"></small>
+            </div>
+            <div class="field">
+              <label for="book-datetime">Date and time</label>
+              <input type="datetime-local" id="book-datetime" required
+                     data-validate="futureDateTime" aria-describedby="err-book-datetime" />
+              <small class="field-error" id="err-book-datetime" role="alert"></small>
+            </div>
+            <button type="submit" class="btn primary">Book and get my queue number</button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="mine-title">
+          <h2 id="mine-title">My appointments</h2>
+          <form id="lookup-form" novalidate>
+            <div class="lookup-row">
+              <label for="lookup-email" class="sr-only">Your email</label>
+              <input type="email" id="lookup-email" required maxlength="254" placeholder="Enter your email"
+                     data-validate="email" aria-describedby="err-lookup-email" />
+              <button type="submit" class="btn secondary">Look up</button>
+            </div>
+            <small class="field-error lookup-error" id="err-lookup-email" role="alert"></small>
+          </form>
+          <div id="my-appointments" class="my-appointments">
+            <p class="empty">Enter your email to see your appointments and queue numbers.</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ STAFF SIDE ============ -->
+      <div class="column">
+        <section class="card staff-card" aria-labelledby="staff-title">
+          <h2 id="staff-title">Staff desk</h2>
+          <button type="button" id="call-next-btn" class="btn accent wide">Call next customer</button>
+          <div id="serving-controls" class="serving-controls"></div>
+        </section>
+
+        <section class="card" aria-labelledby="queue-title">
+          <h2 id="queue-title">Live queue</h2>
+          <label for="queue-search" class="sr-only">Search the queue</label>
+          <input type="search" id="queue-search" class="search" placeholder="Search by number, name, service or status" />
+          <div class="table-wrap">
+            <table class="queue-table">
+              <thead>
+                <tr><th>No.</th><th>Customer</th><th>Service</th><th>Time</th><th>Status</th></tr>
+              </thead>
+              <tbody id="queue-body">
+                <tr><td colspan="5" class="empty">No appointments booked yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="json-title">
+          <h2 id="json-title">Saved data (JSON)</h2>
+          <p class="hint">Everything is saved in this browser as JSON after each change, so it is still here after a refresh.</p>
+          <details>
+            <summary>Show the JSON</summary>
+            <pre id="json-output" class="json-output">{}</pre>
+          </details>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>AppointEase · ITDI110 Checkpoint 3 · OOP, MVC, Singleton and validation · Serah Morris & Andre Banvuhavuha</p>
+      <p class="footer-actions">
+        <button type="button" id="download-json" class="btn-link">Download backup (JSON)</button>
+        <label for="import-json" class="btn-link">Load backup file</label>
+        <input type="file" id="import-json" accept=".json,application/json" class="sr-only" />
+        <button type="button" id="reset-data" class="btn-link">Reset demo data</button>
+        <a href="tests/tests.html" class="btn-link">Run unit tests</a>
+      </p>
+    </div>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Plain scripts, loaded in order (same as the lecture labs): Model -> View -> Controller -> start-up.
+       The error classes and the Validator come first because the other classes use them; Person comes before Customer and Staff because they extend it. -->
+  <script src="models/AppError.js"></script>
+  <script src="models/ValidationError.js"></script>
+  <script src="models/BusinessRuleError.js"></script>
+  <script src="models/StorageError.js"></script>
+  <script src="models/Validator.js"></script>
+  <script src="models/Person.js"></script>
+  <script src="models/ServiceType.js"></script>
+  <script src="models/Appointment.js"></script>
+  <script src="models/QueueManager.js"></script>
+  <script src="models/Customer.js"></script>
+  <script src="models/Staff.js"></script>
+  <script src="models/CustomerRegistry.js"></script>
+  <script src="services/StorageService.js"></script>
+  <script src="views/AppView.js"></script>
+  <script src="controllers/AppController.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

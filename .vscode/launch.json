@@ -1,0 +1,33 @@
+{
+  // Press F5 (or Run > Start Debugging) and pick one of these.
+  // No server and no extension is needed: the browser opens the file directly.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Run AppointEase (Chrome)",
+      "file": "${workspaceFolder}/index.html"
+    },
+    {
+      "type": "msedge",
+      "request": "launch",
+      "name": "Run AppointEase (Edge)",
+      "file": "${workspaceFolder}/index.html"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Run unit tests in the browser (Chrome)",
+      "file": "${workspaceFolder}/tests/tests.html"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run unit tests in the terminal (needs Node.js)",
+      "program": "${workspaceFolder}/tests/run-tests.mjs",
+      "args": ["--verbose"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "appointease-itdi110",
+  "version": "0.3.0",
+  "description": "AppointEase - Online Appointment & Queue Management System (ITDI110 Checkpoint 3)",
+  "scripts": {
+    "test": "node tests/run-tests.mjs",
+    "test:verbose": "node tests/run-tests.mjs --verbose"
+  },
+  "license": "UNLICENSED"
+}

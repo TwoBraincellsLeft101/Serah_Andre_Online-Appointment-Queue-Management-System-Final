@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppointEase – Unit test results</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .summary { margin: 1.5rem 0; padding: 1.2rem 1.5rem; border-radius: 10px; color: #fff; font-size: 1.3rem; font-weight: 700; }
+    .summary.ok { background: var(--ok); }
+    .summary.bad { background: var(--bad); }
+    .summary small { display: block; margin-top: 0.2rem; font-size: 0.9rem; font-weight: 400; opacity: 0.9; }
+    .group { margin-bottom: 1rem; }
+    .group h2 { display: flex; justify-content: space-between; gap: 1rem; font-size: 1.05rem; }
+    .group h2 span { font-weight: 600; font-size: 0.9rem; color: var(--ink-soft); }
+    .results { list-style: none; margin: 0; padding: 0; }
+    .results li { display: grid; grid-template-columns: 4.5rem 1fr; gap: 0.5rem; padding: 0.35rem 0; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+    .results .tag { font-weight: 800; font-size: 0.8rem; letter-spacing: 0.03em; }
+    .results .pass .tag { color: var(--ok); }
+    .results .fail .tag { color: var(--bad); }
+    .results .why { display: block; color: var(--bad); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <h1>AppointEase – Unit tests</h1>
+        <p class="tagline">Each test: Arrange, Act, Assert. Normal, boundary and invalid cases.</p>
+      </div>
+      <p class="staff-badge"><a href="../index.html" style="color:#fff">← Back to the app</a></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="summary" class="summary">Running tests…</div>
+    <div id="groups"></div>
+  </main>
+
+  <!-- Same load order as index.html: errors, Validator, Model, service. Then the test tools and the tests. -->
+  <script src="../models/AppError.js"></script>
+  <script src="../models/ValidationError.js"></script>
+  <script src="../models/BusinessRuleError.js"></script>
+  <script src="../models/StorageError.js"></script>
+  <script src="../models/Validator.js"></script>
+  <script src="../models/Person.js"></script>
+  <script src="../models/ServiceType.js"></script>
+  <script src="../models/Appointment.js"></script>
+  <script src="../models/QueueManager.js"></script>
+  <script src="../models/Customer.js"></script>
+  <script src="../models/Staff.js"></script>
+  <script src="../models/CustomerRegistry.js"></script>
+  <script src="../services/StorageService.js"></script>
+
+  <script src="TestRunner.js"></script>
+  <script src="helpers.js"></script>
+  <script src="validator.test.js"></script>
+  <script src="errors.test.js"></script>
+  <script src="person.test.js"></script>
+  <script src="appointment.test.js"></script>
+  <script src="customer.test.js"></script>
+  <script src="queue.test.js"></script>
+  <script src="staff.test.js"></script>
+  <script src="registry.test.js"></script>
+  <script src="storage.test.js"></script>
+  <script src="regression.test.js"></script>
+
+  <script>
+    // Run every test, print each result to the Console (as in the Week 10 lab) and draw the page.
+    const results = TestRunner.run();
+    results.forEach(r => console.log(`${r.passed ? 'PASS' : 'FAIL'} - ${r.group} > ${r.name}`, r.message ?? ''));
+
+    const passed = results.filter(r => r.passed).length;
+    const summary = document.getElementById('summary');
+    const allGood = passed === results.length;
+    summary.className = `summary ${allGood ? 'ok' : 'bad'}`;
+    summary.innerHTML = '';
+    summary.append(`${passed} of ${results.length} tests passed`);
+    const note = document.createElement('small');
+    note.textContent = allGood ? 'Everything behaves as expected.' : 'Some tests failed – see the red entries below.';
+    summary.append(note);
+
+    const groups = new Map();
+    results.forEach(r => groups.set(r.group, [...(groups.get(r.group) ?? []), r]));
+    const container = document.getElementById('groups');
+    for (const [name, items] of groups) {
+      const card = document.createElement('section');
+      card.className = 'card group';
+      const heading = document.createElement('h2');
+      heading.append(name);
+      const count = document.createElement('span');
+      count.textContent = `${items.filter(i => i.passed).length}/${items.length}`;
+      heading.append(count);
+      const list = document.createElement('ul');
+      list.className = 'results';
+      for (const item of items) {
+        const li = document.createElement('li');
+        li.className = item.passed ? 'pass' : 'fail';
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = item.passed ? 'PASS' : 'FAIL';
+        const text = document.createElement('span');
+        text.textContent = item.name;
+        if (!item.passed) {
+          const why = document.createElement('span');
+          why.className = 'why';
+          why.textContent = item.message;
+          text.append(why);
+        }
+        li.append(tag, text);
+        list.append(li);
+      }
+      card.append(heading, list);
+      container.append(card);
+    }
+  </script>
+</body>
+</html>
